@@ -66,24 +66,19 @@ Aguarde ate aparecer "Successfully installed...".
 Cole no Terminal (substitua os valores):
 
 ```bash
-python3 /home/claude/photo_to_stl_pipeline.py /caminho/para/sua/foto.jpg nome_do_objeto
+python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py /caminho/para/sua/foto.jpg nome_do_objeto
 ```
 
 ### Exemplos reais:
 
 **Se a foto esta no Desktop:**
 ```bash
-python3 /home/claude/photo_to_stl_pipeline.py ~/Desktop/suporte.jpg meu_suporte
-```
-
-**Se a foto esta em /home/claude/:**
-```bash
-python3 /home/claude/photo_to_stl_pipeline.py /home/claude/mouse.jpg meu_mouse
+python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py ~/Desktop/suporte.jpg meu_suporte
 ```
 
 **Se a foto esta em Downloads:**
 ```bash
-python3 /home/claude/photo_to_stl_pipeline.py ~/Downloads/objeto.jpg meu_objeto
+python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py ~/Downloads/objeto.jpg meu_objeto
 ```
 
 ---
@@ -135,15 +130,7 @@ Proximos passos:
 
 O arquivo STL sera criado **no mesmo lugar** onde voce rodou o comando.
 
-### Se rodou do Desktop:
-```bash
-~/Desktop/nome_do_objeto.stl
-```
-
-### Se rodou do /home/claude/:
-```bash
-/home/claude/nome_do_objeto.stl
-```
+O STL e gerado no diretorio de onde voce rodou o comando. O script mostra o caminho absoluto ao final.
 
 ### Para encontrar rapido:
 ```bash
@@ -249,8 +236,8 @@ A qualidade melhora a medida que o objeto e mais comum/documentado online.
 ### Reusar specs
 Se o resultado foi bom, voce pode:
 ```bash
-# Rodar de novo com photo diferente do mesmo objeto
-python3 /home/claude/photo_to_stl_pipeline.py outra_foto.jpg mesmo_objeto_v2
+# Rodar de novo com foto diferente do mesmo objeto
+python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py outra_foto.jpg mesmo_objeto_v2
 ```
 
 ---
@@ -262,7 +249,7 @@ python3 /home/claude/photo_to_stl_pipeline.py outra_foto.jpg mesmo_objeto_v2
 ```bash
 export GOOGLE_API_KEY='sua_chave_aqui'
 pip install google-generativeai trimesh numpy --break-system-packages
-python3 /home/claude/photo_to_stl_pipeline.py ~/Desktop/sua_foto.jpg seu_objeto
+python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py ~/Desktop/sua_foto.jpg seu_objeto
 ```
 
 ---
