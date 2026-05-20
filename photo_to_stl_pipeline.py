@@ -2,17 +2,18 @@ import sys
 import os
 import json
 import re
-import base64
 import numpy as np
 import trimesh
-import google.generativeai as genai
 from pathlib import Path
+from google import genai
+from google.genai import types
 
 SCRIPT_DIR = Path(__file__).parent
 INPUT_DIR  = SCRIPT_DIR / "INPUT"
 OUTPUT_DIR = SCRIPT_DIR / "OUTPUT"
 SUPPORTED  = {".jpg", ".jpeg", ".png", ".webp"}
 MIME_MAP   = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp"}
+MODEL      = "gemini-2.5-flash"
 
 
 def configure_api():
@@ -21,8 +22,7 @@ def configure_api():
         print("ERRO: GOOGLE_API_KEY nao configurada.")
         print("Execute: export GOOGLE_API_KEY='sua_chave'")
         sys.exit(1)
-    genai.configure(api_key=key)
-    return genai.GenerativeModel("gemini-2.0-flash")
+    return genai.Client(api_key=key)
 
 
 def find_images():
@@ -30,7 +30,7 @@ def find_images():
     images = [f for f in INPUT_DIR.iterdir() if f.suffix.lower() in SUPPORTED]
     if not images:
         print(f"Nenhuma imagem encontrada em {INPUT_DIR}/")
-        print(f"Coloque um arquivo .jpg, .jpeg, .png ou .webp na pasta INPUT/ e rode novamente.")
+        print("Coloque um arquivo .jpg, .jpeg, .png ou .webp na pasta INPUT/ e rode novamente.")
         sys.exit(0)
     images.sort(key=lambda f: f.stat().st_mtime, reverse=True)
     return images
@@ -60,10 +60,9 @@ def parse_json_response(text):
     return json.loads(text)
 
 
-def analyze_photo(model, image_path):
+def analyze_photo(client, image_path):
     mime_type = MIME_MAP.get(image_path.suffix.lower(), "image/jpeg")
-    with open(image_path, "rb") as f:
-        image_data = base64.b64encode(f.read()).decode()
+    image_bytes = image_path.read_bytes()
 
     prompt = (
         "Analise esta imagem e identifique o objeto. "
@@ -80,11 +79,17 @@ def analyze_photo(model, image_path):
         "}"
     )
 
-    response = model.generate_content([prompt, {"mime_type": mime_type, "data": image_data}])
+    response = client.models.generate_content(
+        model=MODEL,
+        contents=[
+            types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+            prompt,
+        ],
+    )
     return parse_json_response(response.text)
 
 
-def search_specifications(model, analysis):
+def search_specifications(client, analysis):
     object_name = analysis.get("nome", "objeto desconhecido")
     search_terms = analysis.get("termos_busca", object_name)
     dims_est = analysis.get("dimensoes_estimadas", {})
@@ -105,7 +110,7 @@ def search_specifications(model, analysis):
         "}"
     )
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(model=MODEL, contents=prompt)
     return parse_json_response(response.text)
 
 
@@ -153,7 +158,7 @@ def generate_stl(analysis, specs, output_stem):
 
 
 def main():
-    model = configure_api()
+    client = configure_api()
 
     images = find_images()
     image_path = select_image(images)
@@ -162,13 +167,13 @@ def main():
     print(f"\nProcessando: {image_path.name}  ->  OUTPUT/{output_stem}.stl")
 
     print("\n[1/4] Analisando foto com Gemini Vision...")
-    analysis = analyze_photo(model, image_path)
+    analysis = analyze_photo(client, image_path)
     print(f"      -> Objeto: {analysis.get('nome')}")
     print(f"      -> Dimensoes estimadas: {analysis.get('dimensoes_estimadas')}")
     print(f"      -> Detalhes: {', '.join(analysis.get('detalhes', []))}")
 
     print("\n[2/4] Buscando especificacoes precisas...")
-    specs = search_specifications(model, analysis)
+    specs = search_specifications(client, analysis)
     print(f"      -> Dimensoes refinadas: {specs.get('dimensoes_precisas')}")
     print(f"      -> Material: {specs.get('material_recomendado')}")
     print(f"      -> Detalhes tecnicos: {', '.join(specs.get('detalhes_tecnicos', []))}")
