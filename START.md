@@ -4,88 +4,63 @@
 
 ---
 
-## PRE-REQUISITOS (1 min)
+## PRE-REQUISITOS
 
-- Ter Python 3.9+ instalado (`python3 --version`)
-- Ter a API Key do Google (voce ja tem)
+- Python 3.9+ instalado (`python3 --version`)
+- API Key do Google Gemini
 - Uma foto clara de um objeto
-- 3 minutos de paciencia
 
 ---
 
-## STEP 1: CONFIGURE A API KEY (1 min)
+## STEP 1: CONFIGURE A API KEY
 
-Abra seu Terminal no Mac e copie/cole isso:
+Abra o Terminal e cole:
 
 ```bash
 export GOOGLE_API_KEY='sua_chave_aqui'
 ```
 
-**Substitua `'sua_chave_aqui'` pela sua API Key real.**
-
-Para testar se funcionou:
+Para testar:
 ```bash
 echo $GOOGLE_API_KEY
 ```
 
-Deve retornar sua chave. Se retornar vazio, nao funcionou.
-
 ---
 
-## STEP 2: PREPARE A FOTO (1 min)
-
-### Opcao A: Tire uma foto agora (RECOMENDADO)
-```bash
-# No seu Mac, tire uma foto com iPhone/camera
-# Nomeie como: objeto.jpg
-# Coloque em: /home/claude/ ou ~/Desktop/
-```
-
-### Opcao B: Usa uma foto existente
-Apenas renomeie pra algo simples:
-```bash
-# Exemplo: suporte.jpg, mouse.jpg, adaptador.jpg
-```
-
----
-
-## STEP 3: INSTALE DEPENDENCIAS (2 min)
-
-Copie e cole no Terminal:
+## STEP 2: INSTALE DEPENDENCIAS
 
 ```bash
 pip install google-generativeai trimesh numpy --break-system-packages
 ```
 
-Aguarde ate aparecer "Successfully installed...".
+---
+
+## STEP 3: COLOQUE A FOTO NA PASTA INPUT
+
+Copie ou mova sua foto para:
+
+```
+~/Desktop/GIT_OBJECT_STL/INPUT/
+```
+
+Formatos aceitos: `.jpg`, `.jpeg`, `.png`, `.webp`
+
+O nome do arquivo sera usado como nome do objeto no STL.
+Exemplo: `suporte_camera.jpg` gera `suporte_camera.stl`
 
 ---
 
-## STEP 4: EXECUTE O PIPELINE (1 min)
-
-Cole no Terminal (substitua os valores):
+## STEP 4: EXECUTE O PIPELINE
 
 ```bash
-python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py /caminho/para/sua/foto.jpg nome_do_objeto
+python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py
 ```
 
-### Exemplos reais:
-
-**Se a foto esta no Desktop:**
-```bash
-python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py ~/Desktop/suporte.jpg meu_suporte
-```
-
-**Se a foto esta em Downloads:**
-```bash
-python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py ~/Downloads/objeto.jpg meu_objeto
-```
+Se houver mais de uma foto na pasta INPUT, o script pergunta qual processar.
 
 ---
 
 ## O QUE ACONTECE:
-
-O script rodara em 4 etapas:
 
 ```
 [1/4] Analisando foto com Gemini Vision...
@@ -93,28 +68,29 @@ O script rodara em 4 etapas:
       -> Extrai dimensoes aproximadas
       -> Detecta detalhes
 
-[2/4] Buscando especificacoes precisas na web...
-      -> Procura dimensoes exatas
+[2/4] Buscando especificacoes precisas...
+      -> Refina dimensoes com base no conhecimento tecnico
       -> Material recomendado
       -> Detalhes tecnicos
 
 [3/4] Gerando STL parametrizado...
       -> Cria modelo 3D
       -> Aplica dimensoes reais
-      -> Salva arquivo
+      -> Salva arquivo em OUTPUT/
 
 [4/4] Resumo do processo...
       -> Mostra o que foi criado
       -> Proximos passos
 ```
 
-Se tudo der certo, voce vera:
+Resultado esperado:
 
 ```
 ====================================================
 Objeto: [nome identificado]
 Dimensoes: {'comprimento': X, 'largura': Y, 'altura': Z}
 Material sugerido: PLA/PETG/ABS
+STL: /Users/.../OUTPUT/nome_objeto.stl
 
 Proximos passos:
   1. Abra o STL no Fusion 360
@@ -128,14 +104,15 @@ Proximos passos:
 
 ## ONDE ENCONTRAR O RESULTADO
 
-O arquivo STL sera criado **no mesmo lugar** onde voce rodou o comando.
+O STL e salvo automaticamente em:
 
-O STL e gerado no diretorio de onde voce rodou o comando. O script mostra o caminho absoluto ao final.
+```
+~/Desktop/GIT_OBJECT_STL/OUTPUT/nome_do_objeto.stl
+```
 
-### Para encontrar rapido:
+Para listar os arquivos gerados:
 ```bash
-# Mostra onde esta o arquivo criado
-find ~ -name "*.stl" -type f -mmin -5
+ls ~/Desktop/GIT_OBJECT_STL/OUTPUT/
 ```
 
 ---
@@ -144,7 +121,7 @@ find ~ -name "*.stl" -type f -mmin -5
 
 1. Abra **Fusion 360**
 2. File -> Open
-3. Selecione seu `nome_do_objeto.stl`
+3. Selecione o arquivo em `OUTPUT/`
 4. Modelo aparece em 3D
 5. Voce pode:
    - Refinar geometria
@@ -172,51 +149,25 @@ find ~ -name "*.stl" -type f -mmin -5
 
 ## TROUBLESHOOTING
 
-### "API Key invalida"
+### "GOOGLE_API_KEY nao configurada"
 ```bash
-# Confirme que configurou certo:
-echo $GOOGLE_API_KEY
-
-# Se retornar vazio, configure novamente:
 export GOOGLE_API_KEY='sua_chave'
+echo $GOOGLE_API_KEY  # deve retornar a chave
 ```
 
-### "Arquivo nao encontrado"
-```bash
-# Verifique o caminho completo:
-ls ~/Desktop/foto.jpg   # Se tiver no Desktop
-
-# Ou copie pra /home/claude/:
-cp ~/Desktop/foto.jpg /home/claude/
-```
+### "Nenhuma imagem encontrada em INPUT/"
+- Verifique se a foto esta dentro da pasta `INPUT/`
+- Confirme que o formato e .jpg, .jpeg, .png ou .webp
 
 ### "Erro ao parsear JSON"
-- Tente novamente (as vezes a IA retorna formato errado)
-- Use uma foto mais clara
-- Objeto mais comum (nao muito estranho)
+- Tente novamente (as vezes o Gemini retorna formato inesperado)
+- Use uma foto mais clara com fundo neutro
+- Prefira objetos comuns e bem documentados
 
-### "ModuleNotFoundError: No module named 'google.generativeai'"
+### "ModuleNotFoundError"
 ```bash
-# Reinstale as dependencias:
 pip install --upgrade google-generativeai trimesh numpy --break-system-packages
 ```
-
-### "Timeout / Gemini nao responde"
-- Sua internet pode estar lenta
-- Tente novamente em alguns minutos
-- Use um objeto mais simples de reconhecer
-
----
-
-## PROXIMOS TESTES
-
-Depois de testar com um objeto, tente:
-
-1. **Objeto simples**: Mouse, suporte, caixa
-2. **Objeto medio**: Conector, adaptador, jig
-3. **Objeto complexo**: Eletronico com multiplas partes
-
-A qualidade melhora a medida que o objeto e mais comum/documentado online.
 
 ---
 
@@ -224,32 +175,27 @@ A qualidade melhora a medida que o objeto e mais comum/documentado online.
 
 ### Foto melhor = STL melhor
 - Boa iluminacao (luz natural)
-- Angulo claro (mostra perspectiva)
+- Angulo que mostre perspectiva 3D
 - Fundo neutro (facilita identificacao)
-- Nada cortado (mostra objeto completo)
+- Objeto completo, nada cortado
 
-### STL pronto para impressao
-- A maioria dos modelos ja sai pronta
-- Algumas vezes precisa ajustar suportes
-- Sempre faca um teste pequeno primeiro
-
-### Reusar specs
-Se o resultado foi bom, voce pode:
-```bash
-# Rodar de novo com foto diferente do mesmo objeto
-python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py outra_foto.jpg mesmo_objeto_v2
+### Nome do arquivo = nome do STL
+Nomeie a foto de forma descritiva antes de colocar na INPUT:
+```
+suporte_monitor.jpg    ->  OUTPUT/suporte_monitor.stl
+conector_usb_c.png     ->  OUTPUT/conector_usb_c.stl
 ```
 
 ---
 
 ## READY?
 
-**Copie e cole agora:**
-
 ```bash
+# 1. Configure a chave (uma vez por sessao de terminal)
 export GOOGLE_API_KEY='sua_chave_aqui'
-pip install google-generativeai trimesh numpy --break-system-packages
-python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py ~/Desktop/sua_foto.jpg seu_objeto
+
+# 2. Coloque a foto em INPUT/ e rode:
+python3 ~/Desktop/GIT_OBJECT_STL/photo_to_stl_pipeline.py
 ```
 
 ---
