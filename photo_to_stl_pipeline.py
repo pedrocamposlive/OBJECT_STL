@@ -49,8 +49,9 @@ def select_engine():
 
     print("\nMotor de reconstrucao 3D:")
     print(f"  Dispositivo detectado: {device_hint}\n")
-    print("  [1] TripoSR       — rapido, CPU / MPS / CUDA")
-    print("  [2] InstantMesh   — alta qualidade, CUDA RTX  (Ubuntu + RTX 4090)")
+    print("  [1] TripoSR          — rapido, CPU / MPS / CUDA")
+    print("  [2] InstantMesh      — alta qualidade, CUDA RTX  (Ubuntu + RTX 4090)")
+    print("  [3] DepthAnything v2 — depth map real, CPU / MPS / CUDA")
     print()
 
     while True:
@@ -61,7 +62,7 @@ def select_engine():
             engine = ENGINES[choice]()
             print(f"\nMotor selecionado: {engine.name}")
             return engine
-        print("Opcao invalida. Digite 1 ou 2.")
+        print("Opcao invalida. Digite 1, 2 ou 3.")
 
 
 def run_pipeline(engine, image_path):

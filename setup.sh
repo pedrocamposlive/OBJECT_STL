@@ -56,6 +56,7 @@ $PIP install --upgrade \
     Pillow \
     trimesh \
     numpy \
+    scipy \
     huggingface_hub \
     omegaconf==2.3.0 \
     einops==0.7.0 \
@@ -84,8 +85,17 @@ echo "Patches aplicados."
 # InstantMesh (apenas Linux + CUDA)
 if [[ "$PLATFORM" == "linux-cuda" ]]; then
     echo ""
-    echo "--- Instalando InstantMesh (CUDA) ---"
-    $PIP install diffusers accelerate xformers
+    echo "--- Instalando dependencias InstantMesh (CUDA) ---"
+    $PIP install diffusers accelerate xformers torchvision
+
+    echo ""
+    echo "--- Clonando InstantMesh ---"
+    if [ ! -d "vendor/InstantMesh" ]; then
+        git clone --depth 1 https://github.com/TencentARC/InstantMesh.git vendor/InstantMesh
+        echo "InstantMesh clonado em vendor/InstantMesh/"
+    else
+        echo "vendor/InstantMesh ja existe, pulando clone."
+    fi
 fi
 
 echo ""
